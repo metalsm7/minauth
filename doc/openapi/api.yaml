@@ -1,0 +1,204 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: MinAuth API Document
+  description: |
+    MinAuth API Document
+  termsOfService: empty
+  contact:
+    name: metalsm7
+    email: metalsm7@gmail.com
+    url: https://mparang.com
+  x-logo:
+    #url: 'https://rebilly.github.io/ReDoc/petstore-logo.png'
+    altText: MinAuth
+servers:
+- url: http://localhost
+tags:
+- name: Auth/JWT
+  description: |
+    JWT 인증 처리
+paths:
+  /v1/{service}/jwt:
+    post:
+      tags:
+        - Auth/JWT
+      operationId: JWT Issue
+      summary: JWT 토큰 발급
+      description: |
+        JWT 토큰 발급
+      parameters:
+      - $ref: '#/components/parameters/headers/apiKey'
+      - name: service
+        in: path
+        description: 서비스
+        schema:
+          type: string
+      requestBody:
+        description: JWT 토큰 발급을 위한 요청값
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requests/jwt/issue'
+      responses:
+        200:
+          description: 성공, JWT 토큰
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    $ref: '#/components/properties/jwt/token'
+    get:
+      tags:
+      - Auth/JWT
+      operationId: JWT Verify
+      summary: JWT 토큰 확인
+      description: |
+        JWT 토큰 확인
+      parameters:
+      - $ref: '#/components/parameters/headers/apiKey'
+      - name: service
+        in: path
+        description: 서비스
+        schema:
+          type: string
+      - $ref: '#/components/parameters/queries/signature'
+      - $ref: '#/components/parameters/queries/iat'
+    put:
+      tags:
+        - Auth/JWT
+      operationId: JWT Update
+      summary: JWT 토큰 갱신
+      description: |
+        JWT 토큰 갱신
+      parameters:
+      - $ref: '#/components/parameters/headers/apiKey'
+      - name: service
+        in: path
+        description: 서비스
+        schema:
+          type: string
+      requestBody:
+        description: JWT 토큰 갱신을 위한 요청값
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requests/jwt/update'
+    delete:
+      tags:
+        - Auth/JWT
+      operationId: JWT Withdraw
+      summary: JWT 토큰 폐기
+      description: |
+        JWT 토큰 폐기
+      parameters:
+      - $ref: '#/components/parameters/headers/apiKey'
+      - name: service
+        in: path
+        description: 서비스
+        schema:
+          type: string
+      requestBody:
+        description: JWT 토큰 폐기를 위한 요청값
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requests/jwt/update'
+
+components:
+
+  parameters:
+
+    headers:
+
+      apiKey:
+        name: apiKey
+        in: header
+        description: API Key
+        required: true
+        schema:
+          type: string
+
+    paths:
+
+      # locale:
+      #   name: locale
+      #   in: path
+      #   description:
+      #   required: true
+      #   style: form
+      #   schema:
+      #     type: string
+      #     enum: ['ko-kr', 'en-us', 'ja-jp', 'zh-cn']
+
+    queries:
+
+      iat:
+        name: iat
+        in: query
+        schema:
+          type: number
+
+      signature:
+        name: signature
+        in: query
+        schema:
+          $ref: '#/components/properties/jwt/signature'
+
+  schemas:
+
+    requests:
+
+      jwt:
+
+        issue:
+          type: object
+          required:
+          - payload
+          properties:
+            payload:
+              $ref: '#/components/properties/jwt/payload'
+
+        update:
+          type: object
+          required:
+          - payload
+          - signature
+          properties:
+            payload:
+              $ref: '#/components/properties/jwt/payload'
+            signature:
+              $ref: '#/components/properties/jwt/signature'
+
+  properties:
+  
+    jwt:
+
+      iat:
+        type: number
+        name: iat
+        description: |
+          토큰 발행일시, 1970-01-01T00:00:00Z UTC 기준 지난 시간(초)
+
+      payload:
+        type: string
+        name: payload
+        description: |
+          임의 자료
+
+      signature:
+        type: string
+        name: signature
+        description: |
+          검증용 문자열
+
+      token:
+        type: string
+        name: token
+        description: |
+          JWT 토큰, {header}.{payload}.{signature} 형식의 문자열
